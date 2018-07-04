@@ -39,7 +39,7 @@ func TestMD5Hash(t *testing.T) {
 	assert.Equal(t, v1Digest, v2Digest)
 }
 
-// Two equivalent ways to compute sha1 checksum (16 bytes)
+// Two equivalent ways to compute sha1 checksum (20 bytes)
 func sha1HashV1(key string) string {
 	h := sha1.New()
 	h.Write([]byte(key))
