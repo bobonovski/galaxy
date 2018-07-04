@@ -4,6 +4,7 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
+	"crypto/rsa"
 	"io"
 	"log"
 	"testing"
@@ -47,6 +48,23 @@ func TestAESEncryption(t *testing.T) {
 
 	assert.Equal(t, err, nil)
 	assert.Equal(t, originalText, []byte(plainText))
+}
+
+// RSA encryption
+func TestRSAEncryption(t *testing.T) {
+	privateKey, err := rsa.GenerateKey(rand.Reader, 1024)
+	assert.Equal(t, nil, err)
+
+	publicKey := privateKey.PublicKey
+
+	cipherText, err := rsa.EncryptPKCS1v15(rand.Reader, &publicKey, []byte(plainText))
+	assert.Equal(t, nil, err)
+
+	log.Printf("RSA: cipherText = %x\n", cipherText)
+
+	originalText, err := rsa.DecryptPKCS1v15(rand.Reader, privateKey, cipherText)
+	assert.Equal(t, nil, err)
+	assert.Equal(t, plainText, string(originalText))
 }
 
 // key pair generation
