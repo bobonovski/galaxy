@@ -1,0 +1,39 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "OFu4xJEIjiI8Suu+j/gabfp+y6Q=",
+			"origin": "github.com/stretchr/testify/vendor/github.com/davecgh/go-spew/spew",
+			"path": "github.com/davecgh/go-spew/spew",
+			"revision": "b3596e92796169eee4a0050bceaa767a48cb0075",
+			"revisionTime": "2017-12-30T15:30:04Z"
+		},
+		{
+			"checksumSHA1": "zKKp5SZ3d3ycKe4EKMNT0BqAWBw=",
+			"origin": "github.com/stretchr/testify/vendor/github.com/pmezard/go-difflib/difflib",
+			"path": "github.com/pmezard/go-difflib/difflib",
+			"revision": "b3596e92796169eee4a0050bceaa767a48cb0075",
+			"revisionTime": "2017-12-30T15:30:04Z"
+		},
+		{
+			"checksumSHA1": "UxXFRyg2fFagYtJA5/9J26c0KFg=",
+			"path": "github.com/stretchr/testify/assert",
+			"revision": "b3596e92796169eee4a0050bceaa767a48cb0075",
+			"revisionTime": "2017-12-30T15:30:04Z"
+		},
+		{
+			"checksumSHA1": "2LpxYGSf068307b7bhAuVjvzLLc=",
+			"path": "golang.org/x/crypto/ed25519",
+			"revision": "a49355c7e3f8fe157a85be2f77e6e269a0f89602",
+			"revisionTime": "2018-06-20T09:14:27Z"
+		},
+		{
+			"checksumSHA1": "0JTAFXPkankmWcZGQJGScLDiaN8=",
+			"path": "golang.org/x/crypto/ed25519/internal/edwards25519",
+			"revision": "a49355c7e3f8fe157a85be2f77e6e269a0f89602",
+			"revisionTime": "2018-06-20T09:14:27Z"
+		}
+	],
+	"rootPath": "github.com/bobonovski/galaxy"
+}
