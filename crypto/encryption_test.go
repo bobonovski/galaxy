@@ -3,6 +3,8 @@ package crypto
 import (
 	"crypto/aes"
 	"crypto/cipher"
+	"crypto/ecdsa"
+	"crypto/elliptic"
 	"crypto/rand"
 	"crypto/rsa"
 	"io"
@@ -67,7 +69,24 @@ func TestRSAEncryption(t *testing.T) {
 	assert.Equal(t, plainText, string(originalText))
 }
 
-// key pair generation
+// Elliptic curve digital signature
+func TestEllipticKeyPair(t *testing.T) {
+	curve := elliptic.P256()
+	private, err := ecdsa.GenerateKey(curve, rand.Reader)
+	assert.Equal(t, nil, err)
+
+	publicKey := private.PublicKey
+
+	r, s, err := ecdsa.Sign(rand.Reader, private, []byte(plainText))
+	assert.Equal(t, nil, err)
+
+	log.Printf("EllipticCurve: r = %x, s = %x\n", r.Bytes(), s.Bytes())
+
+	verify := ecdsa.Verify(&publicKey, []byte(plainText), r, s)
+	assert.Equal(t, true, verify)
+}
+
+// ED25519 key pair generation
 func TestKeyPair(t *testing.T) {
 	var seed [32]byte
 
