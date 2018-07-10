@@ -1,27 +1,47 @@
 package main
 
 import (
+	"crypto/md5"
 	"flag"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"log"
 	"net"
 	"time"
+
+	"github.com/golang/protobuf/proto"
+
+	pb "github.com/bobonovski/galaxy/networking/protos"
 )
+
+func md5Hash(key string) string {
+	v := md5.Sum([]byte(key))
+	return fmt.Sprintf("%x", v)
+}
 
 func runTCPClient(serverAddr, peerAddr string) {
 	time.Sleep(5 * time.Second)
 	ticker := time.NewTicker(3 * time.Second)
 	go func() {
-		for t := range ticker.C {
-			conn, err := net.Dial("tcp", peerAddr)
-			if err != nil {
-				log.Fatal(err)
+		for {
+			select {
+			case <-ticker.C:
+				conn, err := net.Dial("tcp", peerAddr)
+				if err != nil {
+					log.Fatal(err)
+				}
+				// serialize message in protobuf
+				ledger := pb.Ledger{
+					Hash:     md5Hash(fmt.Sprintf("%s current hash %d", serverAddr, time.Now().Unix())),
+					PrevHash: md5Hash(fmt.Sprintf("%s previous hash %d", serverAddr, time.Now().Unix())),
+				}
+				ledgerBytes, err := proto.Marshal(&ledger)
+				if err != nil {
+					log.Fatal(err)
+				}
+				conn.Write(ledgerBytes)
+				conn.Close()
 			}
-			io.WriteString(conn,
-				fmt.Sprintf("peer %s send message %v\n", serverAddr, t))
-			conn.Close()
 		}
 	}()
 	time.Sleep(60 * time.Second)
@@ -48,12 +68,19 @@ func RunTCPServer(serverAddr, peerAddr string) {
 }
 
 func handleConnection(conn net.Conn) {
+	var ledger pb.Ledger
 	b, err := ioutil.ReadAll(conn)
 	if err != nil {
 		log.Printf("read data from connection failed: %s\n", err.Error())
 		return
 	}
-	log.Printf("got message: %s", string(b))
+	// unmarshal ledger protobuf data
+	err = proto.Unmarshal(b, &ledger)
+	if err != nil {
+		log.Printf("unmarshal ledger failed: %s\n", err.Error())
+		return
+	}
+	log.Printf("got message: %+v", ledger)
 }
 
 var (
