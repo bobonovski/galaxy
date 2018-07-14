@@ -137,10 +137,10 @@ func (rn *raftNode) serveRaft() {
 			log.Fatalf("listen and serve failed: %v", err)
 		}
 	}()
-	select {
-	case <-rn.httpStopChan:
-		server.Close()
-	}
+
+	<-rn.httpStopChan
+
+	server.Shutdown(nil)
 	close(rn.httpDoneChan)
 }
 
