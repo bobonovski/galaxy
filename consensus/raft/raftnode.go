@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net/http"
 	"net/url"
@@ -14,7 +13,6 @@ import (
 	"github.com/coreos/etcd/pkg/types"
 	"github.com/coreos/etcd/raft"
 	"github.com/coreos/etcd/raft/raftpb"
-	"github.com/coreos/etcd/wal"
 
 	"go.uber.org/zap"
 )
@@ -29,14 +27,11 @@ type raftNode struct {
 	peers  []string // raft peers
 	join   bool     // whether node is joining and existing cluster
 
-	walDir string // write ahead log directory
-
 	confState raftpb.ConfState
 
 	appliedIndex uint64
 
 	node        raft.Node // internal raft node
-	wal         *wal.WAL  // write ahead logger
 	raftStorage *raft.MemoryStorage
 
 	transport *rafthttp.Transport
@@ -60,7 +55,6 @@ func newRaftNode(nodeId int, peers []string, join bool,
 		nodeId:         nodeId,
 		peers:          peers,
 		join:           join,
-		walDir:         fmt.Sprintf("raftnode-%d-wal", nodeId),
 		appliedIndex:   uint64(0),
 		raftStorage:    raft.NewMemoryStorage(),
 		stopChan:       make(chan struct{}),
@@ -225,7 +219,21 @@ func (rn *raftNode) publishEntries(ents []raftpb.Entry) bool {
 				return false
 			}
 		case raftpb.EntryConfChange:
-			// TODO
+			var cc raftpb.ConfChange
+			cc.Unmarshal(ents[i].Data)
+			rn.confState = *rn.node.ApplyConfChange(cc)
+			switch cc.Type {
+			case raftpb.ConfChangeAddNode:
+				if len(cc.Context) > 0 {
+					rn.transport.AddPeer(types.ID(cc.NodeID), []string{string(cc.Context)})
+				}
+			case raftpb.ConfChangeRemoveNode:
+				if cc.NodeID == uint64(rn.nodeId) {
+					log.Println("I've been removed from the cluster, shutdown")
+					return false
+				}
+				rn.transport.RemovePeer(types.ID(cc.NodeID))
+			}
 		}
 		rn.appliedIndex = ents[i].Index
 	}
