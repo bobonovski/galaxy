@@ -110,6 +110,7 @@ func (rn *raftNode) startRaft() {
 	}
 
 	go rn.serveRaft()
+	go rn.serveEvent()
 }
 
 // stop raft node
@@ -124,6 +125,7 @@ func (rn *raftNode) stop() {
 
 // raft http server
 func (rn *raftNode) serveRaft() {
+	log.Printf("start to serve raft\n")
 	url, err := url.Parse(rn.peers[rn.nodeId-1])
 	if err != nil {
 		log.Fatalf("parse url failed: %v", err)
@@ -146,6 +148,7 @@ func (rn *raftNode) serveRaft() {
 
 // serve raft event loop
 func (rn *raftNode) serveEvent() {
+	log.Printf("start to serve event\n")
 	ticker := time.NewTicker(100 * time.Millisecond)
 	defer ticker.Stop()
 	// send proposals over raft
@@ -157,6 +160,7 @@ func (rn *raftNode) serveEvent() {
 				if !ok {
 					rn.proposeChan = nil
 				} else {
+					log.Printf("raft got proposal %x\n", prop)
 					rn.node.Propose(context.TODO(), []byte(prop))
 				}
 			case cc, ok := <-rn.confChangeChan:
@@ -177,6 +181,7 @@ func (rn *raftNode) serveEvent() {
 		case <-ticker.C:
 			rn.node.Tick()
 		case ready := <-rn.node.Ready():
+			log.Printf("raft got ready message: %+v\n", ready.Entries)
 			rn.raftStorage.Append(ready.Entries)
 			rn.transport.Send(ready.Messages)
 			filteredEnts := rn.filterEntries(ready.Entries)

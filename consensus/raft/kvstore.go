@@ -38,6 +38,15 @@ func (kvs *kvStore) Lookup(key string) (string, bool) {
 	return v, ok
 }
 
+func (kvs *kvStore) Propose(key string, val string) {
+	var buf bytes.Buffer
+	encoder := gob.NewEncoder(&buf)
+	if err := encoder.Encode(kvPair{Key: key, Value: val}); err != nil {
+		log.Fatal(err)
+	}
+	kvs.proposeChan <- buf.String()
+}
+
 func (kvs *kvStore) readCommits(commitChan <-chan *string, errorChan <-chan error) {
 	for {
 		select {
