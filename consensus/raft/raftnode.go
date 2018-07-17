@@ -178,7 +178,7 @@ func (rn *raftNode) serveEvent() {
 			log.Printf("raft got ready message: %+v\n", ready.Entries)
 			rn.raftStorage.Append(ready.Entries)
 			rn.transport.Send(ready.Messages)
-			filteredEnts := rn.filterEntries(ready.Entries)
+			filteredEnts := rn.filterEntries(ready.CommittedEntries)
 			if ok := rn.publishEntries(filteredEnts); !ok {
 				rn.stop()
 				return
