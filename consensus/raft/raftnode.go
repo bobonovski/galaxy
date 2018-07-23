@@ -175,7 +175,6 @@ func (rn *raftNode) serveEvent() {
 		case <-ticker.C:
 			rn.node.Tick()
 		case ready := <-rn.node.Ready():
-			log.Printf("raft got ready message: %+v\n", ready.Entries)
 			rn.raftStorage.Append(ready.Entries)
 			rn.transport.Send(ready.Messages)
 			filteredEnts := rn.filterEntries(ready.CommittedEntries)
