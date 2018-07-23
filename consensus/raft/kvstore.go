@@ -56,6 +56,7 @@ func (kvs *kvStore) readCommits(commitChan <-chan *string, errorChan <-chan erro
 			if err := decoder.Decode(&kv); err != nil {
 				log.Fatalf("cannot decode message: %v", err)
 			}
+			log.Printf("kv store got committed message: %+v\n", kv)
 			kvs.mu.Lock() // lock for write
 			kvs.store[kv.Key] = kv.Value
 			kvs.mu.Unlock()
