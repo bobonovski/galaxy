@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"golang.org/x/crypto/ed25519"
+	"golang.org/x/crypto/otr"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -105,4 +106,13 @@ func TestKeyPair(t *testing.T) {
 	pubKey := publicKey.(ed25519.PublicKey)
 	verify := ed25519.Verify(pubKey, message, signature)
 	assert.Equal(t, true, verify)
+}
+
+// Off-The-Record protocol
+func TestOTRConversation(t *testing.T) {
+	priv := new(otr.PrivateKey)
+	priv.Generate(rand.Reader)
+	log.Printf("OTR private key: %x\n", priv.Serialize(nil))
+	log.Printf("OTR public key: %x\n", priv.PublicKey.Serialize(nil))
+	log.Printf("OTR public key fingerprint: %x\n", priv.PublicKey.Fingerprint())
 }
